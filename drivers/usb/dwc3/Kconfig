@@ -37,6 +37,12 @@ config SPL_USB_DWC3_GENERIC
 	  Select this for Xilinx ZynqMP and similar Platforms.
 	  This wrapper supports Host and Peripheral operation modes.
 
+config USB_DWC3_ESWIN
+	bool "support ESWIN Platforms"
+	depends on DM_USB && USB_DWC3 && MISC
+	help
+	  Select this for ESWIN Platforms.
+
 config SPL_USB_DWC3_AM62
 	bool "TI AM62 USB wrapper"
 	depends on SPL_DM_USB && SPL_USB_DWC3_GENERIC && SPL_SYSCON

@@ -730,4 +730,13 @@ config SPL_ADP5585_GPIO
 	help
 	  Support ADP5585 GPIO expander in SPL.
 
+config ESWIN_GPIO
+	bool "Eswin GPIO driver"
+	depends on DM_GPIO
+	help
+	  Support GPIO access on eswin SoCs. The GPIOs are arranged into
+	  a number of banks (different for each SoC type) each with 32 GPIOs.
+	  The GPIOs for a device are defined in the device tree with one node
+	  for each bank.
+
 endif

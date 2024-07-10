@@ -131,3 +131,6 @@ obj-$(CONFIG_$(PHASE_)DM_RNG) += rng/
 endif
 
 obj-y += soc/
+obj-y += mini_graphic_library/
+obj-y += display_logo/
+

@@ -16,6 +16,7 @@ obj-$(CONFIG_$(PHASE_)CLK_STUB) += clk-stub.o
 obj-y += adi/
 obj-y += airoha/
 obj-y += analogbits/
+obj-y += eswin/
 obj-y += imx/
 obj-$(CONFIG_CLK_JH7110) += starfive/
 obj-y += tegra/
