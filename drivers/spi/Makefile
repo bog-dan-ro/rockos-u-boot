@@ -33,6 +33,7 @@ obj-$(CONFIG_CORTINA_SFLASH) += ca_sflash.o
 obj-$(CONFIG_CV1800B_SPIF) += cv1800b_spif.o
 obj-$(CONFIG_DAVINCI_SPI) += davinci_spi.o
 obj-$(CONFIG_DESIGNWARE_SPI) += designware_spi.o
+obj-$(CONFIG_ESWIN_SPI) += es_spi.o
 obj-$(CONFIG_EXYNOS_SPI) += exynos_spi.o
 obj-$(CONFIG_FSL_DSPI) += fsl_dspi.o
 obj-$(CONFIG_FSL_ESPI) += fsl_espi.o
