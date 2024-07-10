@@ -700,6 +700,11 @@ config SL28CPLD
 	  the base driver which provides common access methods for the
 	  sub-drivers.
 
+config ESWIN_PMP
+	bool "Enable Eswin PMP driver"
+	depends on MISC
+	  Support PMP(Physical Memory Protection) on Eswin eic7700 SOC.
+
 config SPL_SOCFPGA_DT_REG
 	bool "Enable register setting from device tree in SPL"
 	depends on SPL
