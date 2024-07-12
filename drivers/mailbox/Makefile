@@ -9,6 +9,7 @@ obj-$(CONFIG_IMX_MU_MBOX) += imx-mailbox.o
 obj-$(CONFIG_SANDBOX_MBOX) += sandbox-mbox.o
 obj-$(CONFIG_SANDBOX_MBOX) += sandbox-mbox-test.o
 obj-$(CONFIG_ESWIN_UMBOX) += eswin-umbox.o
+obj-$(CONFIG_ESWIN_UMBOX) += eswin-umbox-lpcpu.o
 obj-$(CONFIG_ESWIN_UMBOX) += eswin-umbox-func.o
 obj-$(CONFIG_ESWIN_UMBOX) += eswin-umbox-srvc.o
 obj-$(CONFIG_ESWIN_UMBOX) += eswin-umbox-srvc-fun.o
