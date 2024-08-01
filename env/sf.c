@@ -226,7 +226,9 @@ static int env_sf_save(void)
 		goto done;
 
 	sector = DIV_ROUND_UP(CONFIG_ENV_SIZE, sect_size);
-
+	#if defined(CONFIG_ESWIN_SPI)
+	es_bootspi_wp_cfg(0);
+	#endif
 	puts("Erasing SPI flash...");
 	ret = spi_flash_erase(env_flash, CONFIG_ENV_OFFSET,
 		sector * sect_size);
@@ -245,7 +247,9 @@ static int env_sf_save(void)
 		if (ret)
 			goto done;
 	}
-
+	#if defined(CONFIG_ESWIN_SPI)
+	es_bootspi_wp_cfg(1);
+	#endif
 	ret = 0;
 	puts("done\n");
 
@@ -303,6 +307,9 @@ static int env_sf_erase(void)
 	ret = setup_flash_device(&env_flash);
 	if (ret)
 		return ret;
+	#if defined(CONFIG_ESWIN_SPI)
+	es_bootspi_wp_cfg(0);
+	#endif
 
 	memset(&env, 0, sizeof(env_t));
 	ret = spi_flash_write(env_flash, CONFIG_ENV_OFFSET, CONFIG_ENV_SIZE, &env);
@@ -313,6 +320,9 @@ static int env_sf_erase(void)
 		ret = spi_flash_write(env_flash, ENV_OFFSET_REDUND, CONFIG_ENV_SIZE, &env);
 
 done:
+	#if defined(CONFIG_ESWIN_SPI)
+	es_bootspi_wp_cfg(1);
+	#endif
 	spi_flash_free(env_flash);
 
 	return ret;
