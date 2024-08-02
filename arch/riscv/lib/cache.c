@@ -4,6 +4,7 @@
  * Rick Chen, Andes Technology Corporation <rick@andestech.com>
  */
 
+#include <asm/cache.h>
 #include <cpu_func.h>
 #include <dm.h>
 #include <asm/insn-def.h>
