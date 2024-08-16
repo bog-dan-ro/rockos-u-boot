@@ -8,6 +8,7 @@
  *
  * (C) Copyright 2008 Atmel Corporation
  */
+#include <init.h>
 #include <common.h>
 #include <dm.h>
 #include <env.h>
@@ -228,7 +229,7 @@ static int env_sf_save(void)
 
 	sector = DIV_ROUND_UP(CONFIG_ENV_SIZE, sect_size);
 	#if defined(CONFIG_ESWIN_SPI)
-	es_bootspi_wp_cfg(0);
+	es_flash_region_wp_cfg((void *)CONFIG_ENV_OFFSET, CONFIG_ENV_SIZE, 0);
 	#endif
 	puts("Erasing SPI flash...");
 	ret = spi_flash_erase(env_flash, CONFIG_ENV_OFFSET,
@@ -249,7 +250,7 @@ static int env_sf_save(void)
 			goto done;
 	}
 	#if defined(CONFIG_ESWIN_SPI)
-	es_bootspi_wp_cfg(1);
+	es_flash_region_wp_cfg((void *)CONFIG_ENV_OFFSET, CONFIG_ENV_SIZE, 1);
 	#endif
 	ret = 0;
 	puts("done\n");
@@ -309,7 +310,7 @@ static int env_sf_erase(void)
 	if (ret)
 		return ret;
 	#if defined(CONFIG_ESWIN_SPI)
-	es_bootspi_wp_cfg(0);
+	es_flash_region_wp_cfg((void *)CONFIG_ENV_OFFSET, CONFIG_ENV_SIZE, 0);
 	#endif
 
 	memset(&env, 0, sizeof(env_t));
@@ -322,7 +323,7 @@ static int env_sf_erase(void)
 
 done:
 	#if defined(CONFIG_ESWIN_SPI)
-	es_bootspi_wp_cfg(1);
+	es_flash_region_wp_cfg((void *)CONFIG_ENV_OFFSET, CONFIG_ENV_SIZE, 1);
 	#endif
 	spi_flash_free(env_flash);
 
