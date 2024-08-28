@@ -994,28 +994,32 @@ config ANDROID_AB_BACKUP_OFFSET
 	  at offset 0) fails its checksum. The offset is in bytes and must be
 	  multiple of the block size.
 
-choice
-	prompt "Eswin update model select"
-	optional
+config ESWIN_UPDATE
+	bool "ESWIN UPDATE"
+	help
+	  ESWIN Update Application.
+
 
 config SYSTEM_UPDATE_A
 	bool "SYSTEM UPDATE A"
+	depends on ESWIN_UPDATE
 	select CMD_ESWUPDATE
 	help
 	  If enabled, adds support for the new update model.
 
 config SYSTEM_UPDATE_B
 	bool "SYSTEM UPDATE B"
+	depends on ESWIN_UPDATE
 	select CMD_ESWUPDATE
 	help
 	  If enabled, adds support for the new update model.
 
 config SYSTEM_UPDATE_C
 	bool "SYSTEM UPDATE C"
+	depends on ESWIN_UPDATE
 	select CMD_ESWUPDATE
 	help
 	  If enabled, adds support for the new update model.
-endchoice
 endmenu
 
 menu "Blob list"
