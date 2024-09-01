@@ -13,6 +13,7 @@ dtb-$(CONFIG_TARGET_XILINX_MBV) += xilinx-mbv32.dtb
 dtb-$(CONFIG_TARGET_XILINX_MBV) += xilinx-mbv64.dtb
 dtb-$(CONFIG_TARGET_ASPEED_AST2700_IBEX) += ast2700-ibex.dtb
 dtb-$(CONFIG_TARGET_ESWIN_EVB_EIC7700) += eic7700_evb.dtb
+dtb-$(CONFIG_TARGET_ESWIN_EVB_EIC7702) += eic7702_evb_a1.dtb
 dtb-$(CONFIG_TARGET_HIFIVE_PREMIER_P550) += eic7700-hifive-premier-p550.dtb
 
 include $(srctree)/scripts/Makefile.dts

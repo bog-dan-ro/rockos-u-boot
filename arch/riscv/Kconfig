@@ -52,6 +52,9 @@ config TARGET_ASPEED_AST2700_IBEX
 config TARGET_ESWIN_EVB_EIC7700
 	bool "Support Eswin EIC7700 EVB Board"
 
+config TARGET_ESWIN_EVB_EIC7702
+	bool "Support Eswin EIC7702 EVB Board"
+
 config TARGET_HIFIVE_PREMIER_P550
 	bool "Support HiFive Premier P550 Board"
 
@@ -102,6 +105,7 @@ source "board/starfive/visionfive2/Kconfig"
 source "board/thead/th1520_lpi4a/Kconfig"
 source "board/xilinx/mbv/Kconfig"
 source "board/eswin/eic7700_evb/Kconfig"
+source "board/eswin/eic7702_evb/Kconfig"
 source "board/eswin/hifive_premier_p550/Kconfig"
 
 # platform-specific options below
@@ -112,7 +116,7 @@ source "arch/riscv/cpu/fu740/Kconfig"
 source "arch/riscv/cpu/ast2700/Kconfig"
 source "arch/riscv/cpu/generic/Kconfig"
 source "arch/riscv/cpu/jh7110/Kconfig"
-source "arch/riscv/cpu/eic7700/Kconfig"
+source "arch/riscv/cpu/eic770x/Kconfig"
 
 # architecture-specific options below
 
