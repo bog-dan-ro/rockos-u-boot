@@ -55,7 +55,7 @@
     "boot_conf_addr_r=0xc0000000\0" \
     "emmc_dev=0\0" \
     "splashimage=0xe0000000\0" \
-    "splashpos=1660,0\0" \
+    "splashpos=0,0\0" \
     "usbupdate=ext4load usb 0 0x90000000 usbupdate.scr;source 0x90000000\0" \
     "sdupdate=ext4load mmc 1:1 0x90000000 sdupdate.scr;source 0x90000000\0" \
     "typeid_swap=0657FD6D-A4AB-43C4-84E5-0933C84B4F4F\0" \
