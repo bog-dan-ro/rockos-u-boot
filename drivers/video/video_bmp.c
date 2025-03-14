@@ -2,7 +2,25 @@
 /*
  * Copyright (c) 2015 Google, Inc
  */
-
+/*
+ * ESWIN uboot-2024
+ *
+ * Copyright 2024, Beijing ESWIN Computing Technology Co., Ltd.. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Authors: XueFei Zhu <zhuxuefei@eswincomputing.com>
+ */
 #include <bmp_layout.h>
 #include <dm.h>
 #include <log.h>
@@ -11,12 +29,14 @@
 #include <video.h>
 #include <watchdog.h>
 #include <asm/unaligned.h>
+#include <video_eswin.h>
 
 #define BMP_RLE8_ESCAPE		0
 #define BMP_RLE8_EOL		0
 #define BMP_RLE8_EOBMP		1
 #define BMP_RLE8_DELTA		2
 
+extern void sifive_l3_flush64_range(unsigned long start, unsigned long len);
 /**
  * get_bmp_col_16bpp() - Convert a colour-table entry into a 16bpp pixel value
  *
@@ -267,6 +287,7 @@ int video_bmp_display(struct udevice *dev, ulong bmp_image, int x, int y,
 	enum video_format eformat;
 	struct bmp_color_table_entry *palette;
 	int hdr_size;
+	u32 double_screen = 0;
 
 	if (!bmp || !(bmp->header.signature[0] == 'B' &&
 	    bmp->header.signature[1] == 'M')) {
@@ -459,6 +480,18 @@ int video_bmp_display(struct udevice *dev, ulong bmp_image, int x, int y,
 	};
 
 	video_damage(dev, x, y, width, height);
+
+	ret = dev_read_u32(dev, "double-screen", &double_screen);
+	if (ret) {
+		printf("failed to get double-screen, ret %d\n", ret);
+		return ret;
+	}
+
+	if (double_screen == 1) {
+		memcpy((void *)DRM_ESWIN_FB_BUF_DIE1 , (void *)fb, height * width * 4);
+
+		sifive_l3_flush64_range(DRM_ESWIN_FB_BUF_DIE1, height * width * 4);
+	}
 
 	return video_sync(dev, false);
 }
