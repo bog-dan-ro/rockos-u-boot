@@ -49,7 +49,7 @@
     "ramdisk_addr_r=0x88300000\0" \
     "stdin=serial,usbkbd\0" \
     "stderr=vidconsole,serial\0" \
-    "stdout=vidconsole,serial\0" \
+    "stdout=serial\0" \
     "kernel_comp_addr_r=0x98300000\0" \
     "kernel_comp_size=0x10000000\0" \
     "boot_conf_addr_r=0xc0000000\0" \
