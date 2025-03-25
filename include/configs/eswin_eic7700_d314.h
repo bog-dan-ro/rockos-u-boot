@@ -22,7 +22,17 @@
 
 #include <linux/sizes.h>
 
-#define CFG_MALLOC_F_ADDR   0xf0000000
+#define CONFIG_STANDALONE_LOAD_ADDR 0x80200000
+
+/* Environment options */
+#define BOOT_TARGET_DEVICES(func) \
+    func(NVME, nvme, 0) \
+    func(SATA, sata, 0) \
+    func(MMC, mmc, 1) \
+    func(MMC, mmc, 0) \
+    func(USB, usb, 0) \
+    func(PXE, pxe, na) \
+    func(DHCP, dhcp, na)
 
 #include <config_distro_bootcmd.h>
 
@@ -32,9 +42,7 @@
     "initrd_high=0xffffffffffffffff\0" \
     "kernel_addr_r=0x84000000\0" \
     "fdt_addr_r=0x88000000\0" \
-    "fdtfile=eswin/eic7700-d314.dtb\0" \
-    "boot_conf_file=/extlinux/extlinux.conf\0" \
-    "boot_conf_addr_r=0xc0000000\0" \
+    "fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
     "scriptaddr=0x88100000\0" \
     "pxefile_addr_r=0x88200000\0" \
     "ramdisk_addr_r=0x88300000\0" \
@@ -55,12 +63,7 @@
     "uuid_boot=44b7cb94-f58c-4ba6-bfa4-7d2dce09a3a5\0" \
     "uuid_root=80a5a8e9-c744-491a-93c1-4f4194fd690a\0" \
     "uuid_swap=5ebcaaf0-e098-43b9-beef-1f8deedd135e\0" \
-    "partitions=name=boot,start=1MiB,size=512MiB,type=${typeid_efi},uuid=${uuid_boot};name=swap,size=4096MiB,type=${typeid_swap},uuid=${uuid_swap};name=root,size=-,type=${typeid_filesystem},uuid=${uuid_root}\0" \
-    "gpt_partition=gpt write mmc ${emmc_dev} $partitions\0"
-
-#undef CONFIG_BOOTCOMMAND
-#define CONFIG_BOOTCOMMAND \
-    "sysboot mmc ${emmc_dev}:1 any $boot_conf_addr_r $boot_conf_file;"
-
+    "partitions=name=boot,start=1MiB,size=2048MiB,type=${typeid_filesystem},uuid=${uuid_boot};name=swap,size=4096MiB,type=${typeid_swap},uuid=${uuid_swap};name=root,size=-,type=${typeid_filesystem},uuid=${uuid_root}\0" \
+    "gpt_partition=gpt write mmc ${emmc_dev} $partitions\0" \
 
 #endif /* __CONFIG_H */
