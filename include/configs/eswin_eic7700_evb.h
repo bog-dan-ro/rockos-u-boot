@@ -52,7 +52,6 @@
     "stdout=serial\0" \
     "kernel_comp_addr_r=0x98300000\0" \
     "kernel_comp_size=0x10000000\0" \
-    "boot_conf_addr_r=0xc0000000\0" \
     "emmc_dev=0\0" \
     "splashimage=0xe0000000\0" \
     "splashpos=0,0\0" \
