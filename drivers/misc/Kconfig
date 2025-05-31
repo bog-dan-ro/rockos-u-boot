@@ -703,6 +703,7 @@ config SL28CPLD
 config ESWIN_PMP
 	bool "Enable Eswin PMP driver"
 	depends on MISC
+	help
 	  Support PMP(Physical Memory Protection) on Eswin eic7700 SOC.
 
 config SPL_SOCFPGA_DT_REG

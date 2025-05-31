@@ -414,7 +414,6 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
 static int eswin_sdhci_phase_code_tuning(struct sdhci_host *host,
 						  u32 opcode)
 {
-	int cmd_error = 0;
 	int ret = 0;
 	int phase_code = -1;
 	int code_min = -1;
@@ -427,7 +426,7 @@ static int eswin_sdhci_phase_code_tuning(struct sdhci_host *host,
 		sdhci_writew(host, i, VENDOR_AT_SATA_R);
 		eswin_enable_card_clk(host);
 
-		ret = mmc_send_tuning(host->mmc, opcode, &cmd_error);
+		ret = mmc_send_tuning(host->mmc, opcode);
 		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
 		if (ret) {
 			udelay(200);
@@ -473,7 +472,7 @@ static int eswin_sdhci_phase_code_tuning(struct sdhci_host *host,
 	sdhci_writew(host, phase_code, VENDOR_AT_SATA_R);
 	eswin_enable_card_clk(host);
 
-	ret = mmc_send_tuning(host->mmc, opcode, &cmd_error);
+	ret = mmc_send_tuning(host->mmc, opcode);
 	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
 	if (ret) {
 		pr_err("%s: phase_code code(0x%x) not work, tuning failed!\n",
