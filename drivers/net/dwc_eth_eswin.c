@@ -1536,14 +1536,14 @@ static int eqos_probe_resources_eswin(struct udevice *dev)
     ret = clk_get_by_name(dev, "mac-clk-rx", &eqos->clk_rx);
     if (ret) {
         pr_err("clk_get_by_name(rx) failed: %d", ret);
-        goto err_free_clk_master_bus;
+        goto err_probe;
     }
 
 
     ret = clk_get_by_name(dev, "mac-clk-tx", &eqos->clk_tx);
     if (ret) {
         pr_err("clk_get_by_name(tx) failed: %d", ret);
-        goto err_free_clk_rx;
+        goto err_probe;
     }
 
     ret = clk_get_by_name(dev, "eth-ck", &eqos->clk_ck);
@@ -1560,10 +1560,6 @@ static int eqos_probe_resources_eswin(struct udevice *dev)
     debug("%s: OK\n", __func__);
     return 0;
 #ifdef ESWIN_ETH_CLK
-err_free_clk_rx:
-    clk_free(&eqos->clk_rx);
-err_free_clk_master_bus:
-    clk_free(&eqos->clk_master_bus);
 err_probe:
     debug("%s: returns %d\n", __func__, ret);
     return ret;
@@ -1578,9 +1574,6 @@ static int eqos_remove_resources_eswin(struct udevice *dev)
     debug("%s(dev=%p):\n", __func__, dev);
 
 #ifdef ESWIN_ETH_CLK
-    clk_free(&eqos->clk_tx);
-    clk_free(&eqos->clk_rx);
-    clk_free(&eqos->clk_master_bus);
     if (clk_valid(&eqos->clk_ck))
         clk_free(&eqos->clk_ck);
 #endif

@@ -889,7 +889,6 @@ __weak int es_spi_get_clk(struct udevice *bus, ulong *rate)
 
 err_rate:
 	clk_disable(&priv->clk);
-	clk_free(&priv->clk);
 
 	return -EINVAL;
 }
@@ -1414,7 +1413,6 @@ static int es_spi_remove(struct udevice *bus)
 	ret = clk_disable(&priv->clk);
 	if (ret)
 		return ret;
-	clk_free(&priv->clk);
 #endif
 	return 0;
 }
