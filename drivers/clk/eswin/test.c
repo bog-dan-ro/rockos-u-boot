@@ -113,8 +113,6 @@ static int do_clk_test(struct cmd_tbl *cmdtp, int flag, int argc, char *const ar
 		return CMD_RET_USAGE;
 	}
 
-	// Free the clock resource
-	clk_free(&clk);
 	return CMD_RET_SUCCESS;
 }
 
