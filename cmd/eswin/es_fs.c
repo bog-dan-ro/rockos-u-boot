@@ -19,7 +19,7 @@
  * Authors: Xiang Xu <xuxiang@eswincomputing.com>
  */
 #include <stdlib.h>
-#include <common.h>
+#include <linux/kernel.h>
 #include <command.h>
 #include <errno.h>
 #include <blk.h>

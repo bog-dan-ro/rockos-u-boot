@@ -20,7 +20,7 @@
  * Authors: Shuai Qin <qinshuai@eswincomputing.com>
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <clk.h>
 #include <dm.h>
 #include <generic-phy.h>

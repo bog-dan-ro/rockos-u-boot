@@ -20,7 +20,7 @@
  * Authors: LiFei Fang <fanglifei@eswincomputing.com>
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <clk.h>
 #include <cpu_func.h>
 #include <dm.h>

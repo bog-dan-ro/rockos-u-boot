@@ -19,7 +19,7 @@
  * Authors: DengLei <denglei@eswincomputing.com>
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <linux/delay.h>
 #include <malloc.h>
 #include "eswin_dc_test.h"

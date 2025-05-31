@@ -25,7 +25,7 @@
  * Authors: DengLei <denglei@eswincomputing.com>
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <malloc.h>
 #include <syscon.h>
 #include <asm/arch-fu540/clk.h>

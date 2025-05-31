@@ -19,7 +19,7 @@
  * Authors: DengLei <denglei@eswincomputing.com>
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <asm/cache.h>
 #include <asm/io.h>
 #include <dm.h>

@@ -66,7 +66,7 @@ void efi_add_known_memory(void)
 		ram_start = (uintptr_t)gd->ram_base;
 		ram_end = ram_start + gd->ram_size;
 		ram_top = ram_end;
-		efi_add_conventional_memory_map(ram_start, ram_end, ram_top);
+		efi_add_memory_map(ram_start, ram_end, ram_top);
 	}
 }
 #endif

@@ -21,7 +21,6 @@
 #include "display_logo.h"
 #undef ERR_TIMEOUT
 #undef ERR_INVAL
-#include "common.h"
 
 #include <dm.h>
 #include <dm/of_access.h>

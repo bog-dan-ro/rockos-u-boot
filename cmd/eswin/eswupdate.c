@@ -19,7 +19,7 @@
  *
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <command.h>
 #include <update_init.h>
 #include <system_update.h>

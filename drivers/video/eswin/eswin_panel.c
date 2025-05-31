@@ -20,7 +20,7 @@
 #include <drm/dw_mipi_dsi.h>
 
 #include <config.h>
-#include <common.h>
+#include <linux/kernel.h>
 #include <errno.h>
 #include <malloc.h>
 #include <stdint.h>

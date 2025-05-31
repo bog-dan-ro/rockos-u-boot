@@ -19,7 +19,7 @@
  *
  * Authors: Yulin Lu <luyulin@eswincomputing.com>
  */
-#include <common.h>
+#include <linux/kernel.h>
 #include <dm.h>
 #include <dm/pinctrl.h>
 #include <dm/device_compat.h>

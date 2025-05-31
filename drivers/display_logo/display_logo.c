@@ -18,7 +18,6 @@
  *
  */
 
-#include "common.h"
 #include "display_logo.h"
 #include "mmc.h"
 #include "blk.h"

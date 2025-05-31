@@ -22,7 +22,7 @@
 #include <drm/dw_mipi_dsi.h>
 
 #include <config.h>
-#include <common.h>
+#include <linux/kernel.h>
 #include <errno.h>
 #include <asm/unaligned.h>
 #include <asm/io.h>

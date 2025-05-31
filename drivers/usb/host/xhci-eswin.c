@@ -19,7 +19,7 @@
  * Authors: yangwei <yangwei1@eswincomputing.com>
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <dm.h>
 #include <malloc.h>
 #include <usb.h>

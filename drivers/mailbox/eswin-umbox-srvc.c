@@ -20,7 +20,7 @@
  */
 
 #include <asm/io.h>
-#include <common.h>
+#include <linux/kernel.h>
 #include <dm.h>
 #include <eswin/eswin-umbox-srvc.h>
 #include <mailbox.h>

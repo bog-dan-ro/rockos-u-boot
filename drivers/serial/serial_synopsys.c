@@ -18,7 +18,7 @@
  *
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <clk.h>
 #include <debug_uart.h>
 #include <dm.h>

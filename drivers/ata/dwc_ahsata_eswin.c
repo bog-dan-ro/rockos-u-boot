@@ -20,7 +20,7 @@
  * Authors: Yulin Lu <luyulin@eswincomputing.com>
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <ahci.h>
 #include <blk.h>
 #include <bootdev.h>

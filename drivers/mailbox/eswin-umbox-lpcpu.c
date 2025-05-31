@@ -10,7 +10,7 @@
 
 #include <asm/io.h>
 #include <asm/mbox.h>
-#include <common.h>
+#include <linux/kernel.h>
 #include <cpu_func.h>
 #include <dm.h>
 #include <dm/device_compat.h>

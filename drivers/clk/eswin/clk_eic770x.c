@@ -19,7 +19,7 @@
  * Authors: Huangyifeng <huangifeng@eswincomputing.com>
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <clk-uclass.h>
 #include <dm.h>
 #include <dt-structs.h>

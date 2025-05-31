@@ -6,7 +6,7 @@
 #ifndef __ESWIN_MBOX_H
 #define __ESWIN_MBOX_H
 
-#include <common.h>
+#include <linux/kernel.h>
 
 #define ESWIN_MBOX_PING_XOR 0x12345678
 

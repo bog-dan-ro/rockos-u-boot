@@ -18,10 +18,10 @@
  * Authors: Xiang Xu <xuxiang@eswincomputing.com>
  */
 
-#include <common.h>
 #include <cpu_func.h>
 #include <asm/io.h>
 #include <asm/cache.h>
+#include <linux/kernel.h>
 
 #define SIFIVE_L3_FLUSH64 0x200
 #define SIFIVE_L3_FLUSH64_LINE_LEN          64
