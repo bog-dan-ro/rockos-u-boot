@@ -19,7 +19,7 @@
  *
  * Authors: Xiang Xu <xuxiang@eswincomputing.com>
  */
-#include <common.h>
+#include <linux/kernel.h>
 #include <dm.h>
 #include <linux/delay.h>
 #include <linux/io.h>

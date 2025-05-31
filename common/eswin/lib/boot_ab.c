@@ -17,7 +17,7 @@
  *
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <blk.h>
 #include <u-boot/crc.h>
 #include <linux/err.h>

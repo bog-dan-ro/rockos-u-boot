@@ -182,7 +182,7 @@ char net_boot_file_name[1024];
 /* Indicates whether the file name was specified on the command line */
 bool net_boot_file_name_explicit;
 /* The actual transferred size of the bootfile (in bytes) */
-u64 net_boot_file_size;
+u32 net_boot_file_size;
 /* Boot file size in blocks as reported by the DHCP server */
 u32 net_boot_file_expected_size_in_blocks;
 
@@ -723,7 +723,7 @@ restart:
 		case NETLOOP_SUCCESS:
 			net_cleanup_loop();
 			if (net_boot_file_size > 0) {
-				printf("Bytes transferred = %llu (%llx hex)\n",
+				printf("Bytes transferred = %u (%x hex)\n",
 				       net_boot_file_size, net_boot_file_size);
 				env_set_hex("filesize", net_boot_file_size);
 				env_set_hex("fileaddr", image_load_addr);

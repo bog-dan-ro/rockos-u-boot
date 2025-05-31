@@ -21,7 +21,7 @@
  */
 
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <log.h>
 #include <malloc.h>
 #include <asm/gpio.h>

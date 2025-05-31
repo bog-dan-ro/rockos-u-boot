@@ -19,7 +19,7 @@
  * Authors: liangshuang <liangshuang@eswincomputing.com>
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <dm.h>
 #include <dt-structs.h>
 #include <linux/err.h>

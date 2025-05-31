@@ -25,7 +25,7 @@
  * Authors: DengLei <denglei@eswincomputing.com>
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <compiler.h>
 #include <div64.h>
 #include <drm_modes.h>

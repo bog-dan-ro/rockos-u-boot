@@ -7,7 +7,7 @@
 #ifndef _ESWIN_U_MSG_H
 #define _ESWIN_U_MSG_H
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <eswin/0ctr.h>
 #include "eswin/eswin-uMsg-security.h"
 

@@ -7,7 +7,7 @@
 #ifndef __ESWIN_UMBOX_H__
 #define __ESWIN_UMBOX_H__
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <linux/compat.h>
 
 #define ESWIN_MBOX_CHANNELS 2

@@ -7,14 +7,14 @@
 #ifndef __MAILBOX_CSR_H__
 #define __MAILBOX_CSR_H__
 
-#include <common.h>
+#include <linux/kernel.h>
 
 #define E21_IDLE                0x00000000
 #define E21_CHK_BUSY_VAL        0x00000001
 #define E21_IRQ_BIT             0x00000001
 
 /* Mailbox Registers start: */
-//#define MAILBOX_BASE 0x00000000 
+//#define MAILBOX_BASE 0x00000000
 #define REG_WR_DATA_0           (u32)(0x0000)/*Write FIFO data register*/
 #define REG_WR_DATA_1           (u32)(0x0004)/*Write FIFO data register.The highest bit indicates
                                                whether the data is written to FIFO*/
@@ -56,13 +56,13 @@ typedef struct
     u8 mb_int5:1;
     u8 mb_int6:1;
     u8 mb_int7:1;
-    
+
     u8 mb_int8:1;
     u8 mb_int9:1;
     u8 mb_int10:1;
     u8 mb_int11:1;
     u8 reserved0:4;
-    
+
     u8 reserved1:8;
     u8 reserved2:8;
 }MB_INT_T;
@@ -77,7 +77,7 @@ typedef struct
     u8 wr_lock5:1;
     u8 wr_lock6:1;
     u8 wr_lock7:1;
-    
+
     u8 wr_lock8:1;
     u8 wr_lock9:1;
     u8 wr_lock10:1;

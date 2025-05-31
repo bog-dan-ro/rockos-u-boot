@@ -25,7 +25,8 @@
 #include <string.h>
 #include <errno.h>
 #include <stdint.h>
-#include <common.h>
+#include <linux/kernel.h>
+#include <vsprintf.h>
 #include <command.h>
 #include "eswin/es_otp.h"
 

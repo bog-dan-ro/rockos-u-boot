@@ -7,7 +7,7 @@
 #ifndef _ESWIN_IPC_H
 #define _ESWIN_IPC_H
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <eswin/eswin_mailbox_csr.h>
 #include <eswin/eswin-uMsg.h>
 

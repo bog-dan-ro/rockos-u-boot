@@ -4,10 +4,10 @@
  *
  */
 
-#include <common.h>
 #include <blk.h>
 #include <u-boot/crc.h>
 #include <linux/err.h>
+#include <linux/kernel.h>
 #include <part.h>
 #include <system_update.h>
 

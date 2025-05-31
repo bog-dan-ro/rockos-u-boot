@@ -18,7 +18,7 @@
  */
 
 #include <config.h>
-#include <common.h>
+#include <linux/kernel.h>
 #include <malloc.h>
 #include <asm/unaligned.h>
 #include <bmp_layout.h>

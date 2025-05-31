@@ -21,7 +21,7 @@
 
 #include <asm/unaligned.h>
 #include <config.h>
-#include <common.h>
+#include <linux/kernel.h>
 #include <command.h>
 #include <gzip.h>
 #include <errno.h>

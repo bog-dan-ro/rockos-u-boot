@@ -8,7 +8,7 @@
  *
  */
 
-#include <common.h>
+#include <linux/kernel.h>
 #include <command.h>
 #include <dm.h>
 #include <malloc.h>
@@ -18,7 +18,6 @@
 #include <dm/root.h>
 #include <dm/util.h>
 #include <asm/mbox.h>
-#include <common.h>
 #include <dm/test.h>
 #include <asm/mbox.h>
 #include <test/test.h>

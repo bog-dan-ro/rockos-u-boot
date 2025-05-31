@@ -21,7 +21,7 @@
 
 #include <init.h>
 #include <stdlib.h>
-#include <common.h>
+#include <linux/kernel.h>
 #include <command.h>
 #include <errno.h>
 #include <blk.h>
@@ -92,12 +92,9 @@ static struct disk_partition bootchain_part_info;
 static int esburn_init_load_addr(uint64_t addr, uint64_t size)
 {
 #ifdef CONFIG_LMB
-	struct lmb lmb;
 	phys_size_t max_size;
 
-	lmb_init_and_reserve(&lmb, gd->bd, (void *)gd->fdt_blob);
-
-	max_size = lmb_get_free_size(&lmb, addr);
+	max_size = lmb_get_free_size(addr);
 	if (!max_size || max_size < size)
 		return -1;
 #endif
@@ -294,7 +291,7 @@ retry:
 		es_bootspi_wp_cfg(flash, 1);
 		return ret;
 	}
-	package_blk = DIV_ROUND_UP(size, BOOTCHAIN_PACKAGE_SIZE); 
+	package_blk = DIV_ROUND_UP(size, BOOTCHAIN_PACKAGE_SIZE);
 	total_size = size;
 	printf("\rWrite progress: %3d%%:\r", 0);
 	for(int i = 0;i < package_blk; i++) {
@@ -1275,13 +1272,13 @@ static int do_mmc_write(int argc, char *const argv[])
 	}
 	printf("Write progress: %3d%%:\r", 0);
 	for(int i = 0;i < cycle_index; i++) {
-		n = blk_dwrite(mmc_get_blk_desc(mmc), blk + i * package_blk, package_blk, 
+		n = blk_dwrite(mmc_get_blk_desc(mmc), blk + i * package_blk, package_blk,
 				(void __iomem *)(addr + i * package_blk * mmc->write_bl_len));
 		if(n != package_blk){
 			return CMD_RET_FAILURE;
 		}
 		if ((i == cycle_index -1) && last_blk) {
-			n = blk_dwrite(mmc_get_blk_desc(mmc), blk + (i + 1) * package_blk, last_blk, 
+			n = blk_dwrite(mmc_get_blk_desc(mmc), blk + (i + 1) * package_blk, last_blk,
 							(void __iomem *)(addr + (i + 1) * package_blk * mmc->write_bl_len));
 			if(n != last_blk){
 				return CMD_RET_FAILURE;

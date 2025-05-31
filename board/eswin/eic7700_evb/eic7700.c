@@ -19,10 +19,11 @@
  *
  * Authors: Xiang Xu <xuxiang@eswincomputing.com>
  */
-#include <common.h>
+
 #include <dm.h>
 #include <linux/delay.h>
 #include <linux/io.h>
+#include <linux/kernel.h>
 #include "env.h"
 #include <errno.h>
 #include <blk.h>
