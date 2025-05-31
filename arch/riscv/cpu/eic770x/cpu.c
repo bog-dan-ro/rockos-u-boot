@@ -48,15 +48,13 @@ int cleanup_before_linux(void)
 	return 0;
 }
 
-void *board_fdt_blob_setup(int *err)
+int board_fdt_blob_setup(void **fdtp)
 {
-	*err = 0;
-	if (IS_ENABLED(CONFIG_OF_SEPARATE) || IS_ENABLED(CONFIG_OF_BOARD)) {
-		if (fdt_magic((uintptr_t)gd->arch.firmware_fdt_addr) == FDT_MAGIC)
-			return (ulong *)(uintptr_t)gd->arch.firmware_fdt_addr;
+	if (gd->arch.firmware_fdt_addr) {
+		*fdtp = (ulong *)(uintptr_t)gd->arch.firmware_fdt_addr;
+		return 0;
 	}
-
-	return (ulong *)_end;
+	return -EEXIST;
 }
 
 

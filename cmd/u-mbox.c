@@ -37,7 +37,7 @@ void ut_failf(struct unit_test_state *uts, const char *fname, int line,
 	vprintf(fmt, args);
 	va_end(args);
 	putc('\n');
-	uts->fail_count++;
+	uts->cur.fail_count++;
 }
 
 static int do_mailbox_test(struct cmd_tbl *cmdtp, int flag, int argc,
