@@ -407,12 +407,13 @@ static void ahci_fill_cmd_slot(struct ahci_ioports *pp, u32 cmd_slot, u32 opts)
 {
 	struct ahci_cmd_hdr *cmd_hdr = (struct ahci_cmd_hdr *)(pp->cmd_slot +
 					AHCI_CMD_SLOT_SZ * cmd_slot);
+	phys_addr_t pa = virt_to_phys(pp->cmd_tbl);
 
 	memset(cmd_hdr, 0, AHCI_CMD_SLOT_SZ);
 	cmd_hdr->opts = cpu_to_le32(opts);
 	cmd_hdr->status = 0;
-	pp->cmd_slot->tbl_addr = cpu_to_le32(lower_32_bits(pp->cmd_tbl));
-	pp->cmd_slot->tbl_addr_hi = cpu_to_le32(upper_32_bits(pp->cmd_tbl));
+	pp->cmd_slot->tbl_addr = cpu_to_le32(lower_32_bits(pa));
+	pp->cmd_slot->tbl_addr_hi = cpu_to_le32(upper_32_bits(pa));
 }
 
 #define AHCI_GET_CMD_SLOT(c) ((c) ? ffs(c) : 0)
@@ -472,7 +473,8 @@ static int ahci_port_start(struct ahci_uc_priv *uc_priv, u8 port)
 	struct ahci_ioports *pp = &uc_priv->port[port];
 	struct sata_port_regs *port_mmio = pp->port_mmio;
 	u32 port_status;
-	u64 mem;
+	phys_addr_t dma_addr;
+	void* mem;
 	int timeout = 10000000;
 
 	debug("Enter start port: %d\n", port);
@@ -483,14 +485,13 @@ static int ahci_port_start(struct ahci_uc_priv *uc_priv, u8 port)
 		return -1;
 	}
 
-	mem = (u64)malloc(AHCI_PORT_PRIV_DMA_SZ + 1024);
+	mem = memalign(2048, AHCI_PORT_PRIV_DMA_SZ);
 	if (!mem) {
 		printf("No mem for table!\n");
 		return -ENOMEM;
 	}
 
-	mem = (mem + 0x400) & (~0x3ff);	/* Aligned to 1024-bytes */
-	memset((u8 *)mem, 0, AHCI_PORT_PRIV_DMA_SZ);
+	memset(mem, 0, AHCI_PORT_PRIV_DMA_SZ);
 
 	/*
 	 * First item in chunk of DMA memory: 32-slot command table,
@@ -498,12 +499,12 @@ static int ahci_port_start(struct ahci_uc_priv *uc_priv, u8 port)
 	 */
 	pp->cmd_slot = (struct ahci_cmd_hdr *)mem;
 	debug("cmd_slot = 0x%llx\n", (u64) pp->cmd_slot);
-	mem += (AHCI_CMD_SLOT_SZ * DWC_AHSATA_MAX_CMD_SLOTS);
+	mem += (AHCI_CMD_SLOT_SZ * AHCI_MAX_CMD_SLOT);
 
 	/*
 	 * Second item: Received-FIS area, 256-Byte aligned
 	 */
-	pp->rx_fis = (u32)mem;
+	pp->rx_fis = mem;
 	mem += AHCI_RX_FIS_SZ;
 
 	/*
@@ -511,14 +512,20 @@ static int ahci_port_start(struct ahci_uc_priv *uc_priv, u8 port)
 	 * and its scatter-gather table
 	 */
 	pp->cmd_tbl = mem;
-	debug("cmd_tbl_dma = 0x%lx\n", pp->cmd_tbl);
+	debug("cmd_tbl_dma = 0x%p\n", pp->cmd_tbl);
 
 	mem += AHCI_CMD_TBL_HDR;
+	pp->cmd_tbl_sg = (struct ahci_sg *)mem;
 
 	writel_with_flush(0x00004444, &port_mmio->dmacr);
-	pp->cmd_tbl_sg = (struct ahci_sg *)mem;
-	writel_with_flush((u64)pp->cmd_slot, &port_mmio->clb);
-	writel_with_flush(pp->rx_fis, &port_mmio->fb);
+	dma_addr = virt_to_phys(pp->cmd_slot);
+	debug("cmd_slot_dma = 0x%08llx\n", (u64)dma_addr);
+	writel_with_flush(lower_32_bits(dma_addr), &port_mmio->clb);
+	writel_with_flush(upper_32_bits(dma_addr), &port_mmio->clbu);
+	dma_addr = virt_to_phys(pp->cmd_slot);
+	debug("rx_fis_slot_dma = 0x%08llx\n", (u64)dma_addr);
+	writel_with_flush(lower_32_bits(dma_addr), &port_mmio->fb);
+	writel_with_flush(upper_32_bits(dma_addr), &port_mmio->fbu);
 
 	/* Enable FRE */
 	writel_with_flush((SATA_PORT_CMD_FRE | readl(&port_mmio->cmd)),
