@@ -59,7 +59,7 @@ jobs:
         run: |
               sudo apt update && \
               sudo apt install -y gdisk dosfstools g++-12-riscv64-linux-gnu build-essential \
-                                  libncurses-dev gawk flex bison openssl libssl-dev tree \
+                                  libncurses-dev gawk flex bison openssl libssl-dev tree libgnutls28-dev \
                                   dkms libelf-dev libudev-dev libpci-dev libiberty-dev autoconf device-tree-compiler
 
       - name: Checkout uboot
