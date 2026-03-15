@@ -300,6 +300,12 @@ int set_cpu_clk_info(void);
 int update_flash_size(int flash_size);
 int arch_early_init_r(void);
 int misc_init_r(void);
+int eswin_pmp_init(void);
+
+#include <spi_flash.h>
+int es_bootspi_write_protection_init(void);
+int es_bootspi_wp_cfg(struct spi_flash *flash, int enable);
+int es_flash_region_wp_cfg(struct spi_flash *flash, void *addr, int size, bool lock);
 
 /* common/board_info.c */
 int checkboard(void);

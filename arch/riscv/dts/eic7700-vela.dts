@@ -1,0 +1,131 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Device Tree file for Eswin EIC7700 VELA Board.
+ *
+ * Copyright 2024, Beijing ESWIN Computing Technology Co., Ltd.. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Authors: Xiang Xu <xuxiang@eswincomputing.com>
+ */
+#include "eic7700-som260.dtsi"
+
+/ {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	model = "ESWIN EIC7700 VELA";
+	compatible = "eswin,eic7700";
+
+	aliases {
+		serial0 = &uart0;
+		gpio0 = &gpio0;
+		spi0 = &bootspi;
+		spi1 = &dw_spi0;
+	};
+};
+
+&sd {
+	status = "okay";
+	delay_code = <0x3b>;
+	drive-impedance-ohm = <33>;
+	enable-cmd-pullup;
+	enable-data-pullup;
+};
+
+&sdio1 {
+        status = "okay";
+        delay_code = <0x29>;
+        drive-impedance-ohm = <33>;
+        enable-cmd-pullup;
+        enable-data-pullup;
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_gpio79_default>;
+        rst-gpios = <&portc 15 GPIO_ACTIVE_HIGH>;
+};
+
+
+&eswin_sata {
+	status = "okay";
+};
+
+
+&pcie {
+	status = "okay";
+};
+
+&eth0 {
+	status = "okay";
+	phy-mode = "rgmii-txid";
+	max-speed = <1000>;
+	phy-handle = <&phy0>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_gpio80_default>;
+	rst-gpios = <&portc 16 GPIO_ACTIVE_LOW>;
+	dly-param-1000m = <0x23232323 0xa0209023 0x20202020>;
+	dly-param-100m = <0x50505050 0x803f8050 0x3f3f3f3f>;
+	dly-param-10m = <0 0 0>;
+	mdio0 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		phy0: ethernet-phy@1 {
+			reg = <0>;
+		};
+	};
+};
+
+&eth1 {
+	status = "disabled";
+	phy-mode = "rgmii-txid";
+	max-speed = <1000>;
+	phy-handle = <&phy1>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_gpio81_default>;
+	rst-gpios = <&portc 17 GPIO_ACTIVE_LOW>;
+	dly-param-1000m = <0x00000000 0xda02e000 0x02020202>;
+	dly-param-100m = <0x48484848 0x80588048 0x58585858>;
+	dly-param-10m = <0 0 0>;
+	mdio1 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		phy1: ethernet-phy@1 {
+			reg = <0>;
+		};
+	};
+};
+
+&display_logo {
+	status = "disabled";
+};
+&dwc3_typec0 {
+		status = "okay";
+		dr_mode = "peripheral";
+		maximum-speed = "super-speed";
+};
+&usb0 {
+	status = "okay";
+};
+&usb1 {
+	status = "okay";
+};
+&hdmi {
+	status = "okay";
+};
+&display_subsystem {
+	status = "okay";
+};
+&route_hdmi {
+	status = "okay";
+};
+&osd {
+	status = "okay";
+};

@@ -476,6 +476,7 @@ const struct flash_info spi_nor_ids[] = {
 	{ INFO("m25px16",    0x207115,  0, 64 * 1024, 32, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
 	{ INFO("m25px64",    0x207117,  0, 64 * 1024, 128, 0) },
 #endif
+	{ INFO("py25q128la", 0x856518, 0, 64 * 1024, 256, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
 #ifdef CONFIG_SPI_FLASH_WINBOND		/* WINBOND */
 	/* Winbond -- w25x "blocks" are 64K, "sectors" are 4KiB */
 	{ INFO("w25p80", 0xef2014, 0x0,	64 * 1024,    16, 0) },
@@ -530,6 +531,11 @@ const struct flash_info spi_nor_ids[] = {
 	},
 	{
 		INFO("w25q128fw", 0xef6018, 0, 64 * 1024, 256,
+			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ |
+			SPI_NOR_HAS_LOCK | SPI_NOR_HAS_TB)
+	},
+	{
+		INFO("w25q128jw", 0xef8018, 0, 64 * 1024, 256,
 			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ |
 			SPI_NOR_HAS_LOCK | SPI_NOR_HAS_TB)
 	},

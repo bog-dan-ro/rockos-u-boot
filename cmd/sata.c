@@ -56,19 +56,13 @@ int sata_probe(int devnum)
 	int rc;
 
 	rc = uclass_get_device(UCLASS_AHCI, devnum, &dev);
-	if (rc)
-		rc = uclass_find_first_device(UCLASS_AHCI, &dev);
 	if (rc) {
-		printf("Cannot probe SATA device %d (err=%d)\n", devnum, rc);
-		return CMD_RET_FAILURE;
-	}
-	if (!dev) {
 		printf("No SATA device found!\n");
 		return CMD_RET_FAILURE;
 	}
-	rc = sata_scan(dev);
+	rc = sata_rescan(true);
 	if (rc) {
-		printf("Cannot scan SATA device %d (err=%d)\n", devnum, rc);
+		printf("Cannot scan SATA device(err=%d)\n", rc);
 		return CMD_RET_FAILURE;
 	}
 
@@ -91,15 +85,8 @@ static int do_sata(struct cmd_tbl *cmdtp, int flag, int argc,
 		if (!strcmp(argv[1], "stop"))
 			return sata_remove(devnum);
 
-		if (!strcmp(argv[1], "init")) {
-			if (sata_curr_device != -1) {
-				rc = sata_remove(devnum);
-				if (rc)
-					return rc;
-			}
-
+		if (!strcmp(argv[1], "init"))
 			return sata_probe(devnum);
-		}
 	}
 
 	/* If the user has not yet run `sata init`, do it now */

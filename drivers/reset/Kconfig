@@ -254,4 +254,9 @@ config RESET_SPACEMIT_K1
 	  is supported.
 
 source "drivers/reset/stm32/Kconfig"
+config RESET_ESWIN
+	bool "Reset controller driver for Eswin SoCs"
+	depends on DM_RESET
+	help
+	  Support for reset controller on Eswin SoCs.
 endmenu

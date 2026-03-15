@@ -891,6 +891,7 @@ config VIDEO_IVYBRIDGE_IGD
 	  resolution can be selected in U-Boot.
 
 source "drivers/video/rockchip/Kconfig"
+source "drivers/video/eswin/Kconfig"
 
 config VIDEO_SANDBOX_SDL
 	bool "Enable sandbox video console using SDL"

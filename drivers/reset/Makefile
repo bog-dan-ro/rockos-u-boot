@@ -38,3 +38,5 @@ obj-$(CONFIG_RESET_SPACEMIT_K1) += reset-spacemit-k1.o
 
 obj-$(CONFIG_ARCH_STM32) += stm32/
 obj-$(CONFIG_ARCH_STM32MP) += stm32/
+obj-$(CONFIG_$(SPL_TPL_)RESET_JH7110) += reset-jh7110.o
+obj-$(CONFIG_RESET_ESWIN) += reset-eswin.o

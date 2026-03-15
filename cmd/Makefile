@@ -71,6 +71,7 @@ obj-$(CONFIG_CMD_EEPROM) += eeprom.o
 obj-$(CONFIG_EFI_CLIENT) += efi.o efi_common.o
 obj-$(CONFIG_CMD_EFIDEBUG) += efidebug.o efi_common.o
 obj-$(CONFIG_CMD_EFICONFIG) += eficonfig.o
+obj-$(CONFIG_CMD_ESWIN_DIE) += eswin_die.o
 ifdef CONFIG_CMD_EFICONFIG
 ifdef CONFIG_EFI_MM_COMM_TEE
 obj-$(CONFIG_EFI_SECURE_BOOT) += eficonfig_sbkey.o
@@ -107,6 +108,7 @@ obj-$(CONFIG_CMD_JFFS2) += jffs2.o
 obj-$(CONFIG_CMD_CRAMFS) += cramfs.o
 obj-$(CONFIG_LED_STATUS_CMD) += legacy_led.o
 obj-$(CONFIG_CMD_LED) += led.o
+obj-$(CONFIG_ESWIN_UMBOX) += u-mbox.o
 obj-$(CONFIG_CMD_LICENSE) += license.o
 obj-y += load.o
 obj-$(CONFIG_CMD_LOG) += log.o
@@ -227,6 +229,7 @@ obj-$(CONFIG_CMD_MBR) += mbr.o
 obj-$(CONFIG_CMD_ETHSW) += ethsw.o
 obj-$(CONFIG_CMD_AXI) += axi.o
 obj-$(CONFIG_CMD_PVBLOCK) += pvblock.o
+obj-y += eswin/
 
 # Power
 obj-$(CONFIG_CMD_PMIC) += pmic.o

@@ -6,6 +6,13 @@ SUBLEVEL =
 EXTRAVERSION = -rc4
 NAME =
 
+# Read firmware version from VERSION file (if it exists)
+VPU_FW_VERSION := $(shell if [ -f $(CURDIR)/VPU_FW_VERSION ]; then cat $(CURDIR)/VPU_FW_VERSION; else echo "B1.0.001"; fi)
+
+# Read ECC flag from buildroot/.config
+ENABLE_DDR_ECC := $(shell if [ -f "$(BR2_CONFIG)" ] && grep -q "BR2_PACKAGE_DDR_ENABLE_ECC=y" "$(BR2_CONFIG)"; then echo 1; else echo 0; fi)
+$(info ENABLE_DDR_ECC=$(ENABLE_DDR_ECC))
+
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
 # More info can be located in ./README
@@ -1028,6 +1035,10 @@ include $(srctree)/scripts/Makefile.extrawarn
 
 # Add user supplied CPPFLAGS, AFLAGS and CFLAGS as the last assignments
 KBUILD_CPPFLAGS += $(KCPPFLAGS)
+ifneq ($(CONFIG_BOOT_ESWIN_VPU7702),)
+KBUILD_CPPFLAGS += -DVPU_FW_VERSION=\"$(VPU_FW_VERSION)\"
+endif
+KBUILD_CPPFLAGS += -DENABLE_DDR_ECC=$(ENABLE_DDR_ECC)
 KBUILD_AFLAGS += $(KAFLAGS)
 KBUILD_CFLAGS += $(KCFLAGS)
 

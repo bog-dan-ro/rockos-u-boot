@@ -2,9 +2,21 @@
 /*
  * Generic DWC3 Glue layer
  *
- * Copyright (C) 2016 - 2018 Xilinx, Inc.
+ * Copyright 2024, Beijing ESWIN Computing Technology Co., Ltd.. All rights reserved.
  *
- * Based on dwc3-omap.c.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Authors: yangwei <yangwei1@eswincomputing.com>
  */
 
 #include <dm.h>
@@ -13,6 +25,7 @@
 #include <dm/device_compat.h>
 #include <dm/lists.h>
 #include <linux/delay.h>
+#include <linux/io.h>
 #include <linux/usb/gadget.h>
 #include <power/regulator.h>
 #include <usb/xhci.h>
@@ -39,6 +52,45 @@ struct dwc3_generic_host_priv {
 	struct udevice *vbus_supply;
 };
 
+static int dwc_usb_clk_init(void)
+{
+        void __iomem *crg_regs;
+        void __iomem *hsp_regs;
+        u32 val = 0;
+        /*Use clk framework instead*/
+        hsp_regs = ioremap(0x50440000, 0x200);
+        crg_regs = ioremap(0x51828000, 0x1000);
+
+        //reset hsp_por
+        val = readl(crg_regs + 0x41c);
+        val |= 0x00018007;
+        writel(val, crg_regs + 0x41c);
+
+        //enable scu_hsp_pclk
+        writel(0x80000020, crg_regs + 0x148);
+        writel(0xc0000000, crg_regs + 0x14c);
+
+        //usb0 clk init
+        //ref clk is 24M, below need to be set to satisfy usb phy requirement(125M)
+        writel(0x0000002a, hsp_regs + 0x83c);
+        writel(0x00000000, hsp_regs + 0x840);
+
+        //reset usb core and usb phy
+        writel(0x11010201, hsp_regs + 0x800);
+        writel(0x00010001, hsp_regs + 0x808);
+
+        //usb1 clk init
+        //ref clk is 24M, below need to be set to satisfy usb phy requirement(125M)
+        writel(0x0000002a, hsp_regs + 0x93c);
+        writel(0x00000000, hsp_regs + 0x940);
+
+        //reset usb core and usb phy
+        writel(0x11010201, hsp_regs + 0x900);
+        writel(0x00010001, hsp_regs + 0x908);
+
+        return 0;
+}
+
 static int dwc3_generic_probe(struct udevice *dev,
 			      struct dwc3_generic_priv *priv,
 			      enum usb_dr_mode mode)
@@ -49,6 +101,15 @@ static int dwc3_generic_probe(struct udevice *dev,
 	struct dwc3_glue_data *glue = dev_get_plat(dev->parent);
 	int __maybe_unused index;
 	ofnode __maybe_unused node;
+	struct gpio_desc __maybe_unused pwren_gpio;
+
+
+	if (device_is_compatible(dev->parent, "eswin,eic7700-dwc3-dev")) {
+		if (!gpio_request_by_name(dev, "pwren-gpios", 0, &pwren_gpio, GPIOD_IS_OUT | GPIOD_IS_OUT_ACTIVE)) {
+			dm_gpio_set_value(&pwren_gpio, 1);
+		}
+		dwc_usb_clk_init();
+	}
 
 	dwc3->dev = dev;
 	dwc3->maximum_speed = plat->maximum_speed;
@@ -90,6 +151,11 @@ static int dwc3_generic_probe(struct udevice *dev,
 		udelay(1);
 	}
 
+	if (device_is_compatible(dev->parent, "eswin,eic7700-dwc3-dev")) {
+		reset_assert_bulk(&glue->resets);
+		udelay(1);
+	}
+
 	rc = dwc3_setup_phy(dev, &priv->phys);
 	if (rc && rc != -ENOTSUPP)
 		return rc;
@@ -116,6 +182,9 @@ static int dwc3_generic_probe(struct udevice *dev,
 	}
 
 	if (device_is_compatible(dev->parent, "rockchip,rk3399-dwc3"))
+		reset_deassert_bulk(&glue->resets);
+
+	if (device_is_compatible(dev->parent, "eswin,eic7700-dwc3-dev"))
 		reset_deassert_bulk(&glue->resets);
 
 	priv->base = map_physmem(plat->base, DWC3_OTG_REGS_END, MAP_NOCACHE);
@@ -731,6 +800,7 @@ static const struct udevice_id dwc3_glue_ids[] = {
 	{ .compatible = "intel,tangier-dwc3" },
 	{ .compatible = "samsung,exynos7870-dwusb3" },
 	{ .compatible = "samsung,exynos850-dwusb3" },
+	{ .compatible = "eswin,eic7700-dwc3-dev" },
 	{ }
 };
 

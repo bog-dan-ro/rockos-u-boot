@@ -680,7 +680,7 @@ restart:
 		case NETLOOP_SUCCESS:
 			net_cleanup_loop();
 			if (net_boot_file_size > 0) {
-				printf("Bytes transferred = %u (%x hex)\n",
+				printf("Bytes transferred = %llu (%llx hex)\n",
 				       net_boot_file_size, net_boot_file_size);
 				env_set_hex("filesize", net_boot_file_size);
 				env_set_hex("fileaddr", image_load_addr);

@@ -20,6 +20,7 @@
 #include <memalign.h>
 #include <menu.h>
 #include <post.h>
+#include <stdio.h>
 #include <time.h>
 #include <asm/global_data.h>
 #include <linux/delay.h>
@@ -27,6 +28,9 @@
 #include <bootcount.h>
 #include <crypt.h>
 #include <dm/ofnode.h>
+#include <stdlib.h>
+#include <linux/io.h>
+#include <net.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -58,6 +62,119 @@ static int menukey;
 #else
 #define AUTOBOOT_MENUKEY 0
 #endif
+#ifdef CONFIG_BOOT_ESWIN_VPU7702
+#define BOOT_SIGN	0xB00C
+#define READY_SIGN	0x2EA1
+#define BAR0_UPDATE 0xC00E
+#define BAR0_UPDATE_DONE 0xDB0A
+#define DIE1_SIGN	0x2EA2
+
+#define TEST_REG0 0x51810668
+#define TEST_REG2 0x51810670
+#define TEST_REG3 0x51810674
+#define PCIE_CTRL_CFG14	0x50000034
+#define TEST_REG2_DIE1 0x71810670
+
+#define VERSION_TABLE_PHYS_ADDR  0x104413000ULL
+#define VERSION_TABLE1_PHYS_ADDR 0x2084413000ULL
+
+#define FIRMWARE_VERSION_OFFSET	 (0)
+#define FIRMWARE_VERSION_MAX_LEN 32 /* Maximum length for firmware version string */
+
+/* Define firmware version */
+#ifndef VPU_FW_VERSION
+#define VPU_FW_VERSION "B1.0.001" /* Default version if not defined in build */
+#endif
+
+/* 
+ * Static string for version identification via strings command
+ * This will be embedded in the binary and searchable via strings command
+ */
+static const char vpu_fw_version_string[] __attribute__((used)) = "VPU_FW_VERSION: " VPU_FW_VERSION;
+
+/**
+ * early_print_vpu_version - Print VPU firmware version early in boot
+ *
+ * This function prints the VPU firmware version before CPU info
+ * to match the required boot sequence.
+ */
+int early_print_vpu_version(void)
+{
+	printf("VPU_FW_VERSION: %s\n", VPU_FW_VERSION);
+	return 0;
+}
+
+/**
+ * get_die_ordinary - Get the die ordinary value based on GPIO status
+ *
+ * Check GPIO58~61 to determine if this is DIE0
+ * DIE0 is indicated by all GPIO58~61 being 0
+ *
+ * Return: 0 if DIE0, 1 if not DIE0
+ */
+int get_die_ordinary(void)
+{
+	int die_ordinary = 0;
+	// Read die ordinary GPIO values
+	int die_values[4] = { 0 };
+	unsigned int die_gpio_pins[4] = { 58, 59, 60, 61 };
+	int i;
+	int ret;
+
+	printf("Reading die ordinary GPIOs:\n");
+	for (i = 0; i < 4; i++) {
+		ret = gpio_request(die_gpio_pins[i], "die-ordinary");
+		if (ret) {
+			printf("Failed to request GPIO%d: %d\n", die_gpio_pins[i], ret);
+			return ret;
+		}
+
+		ret = gpio_direction_input(die_gpio_pins[i]);
+		if (ret) {
+			printf("Failed to set GPIO%d as input: %d\n", die_gpio_pins[i], ret);
+			gpio_free(die_gpio_pins[i]);
+			return ret;
+		}
+
+		die_values[i] = gpio_get_value(die_gpio_pins[i]);
+
+		gpio_free(die_gpio_pins[i]);
+	}
+
+	// Calculate die_ordinary from GPIO values
+	die_ordinary = die_values[3] << 3 | die_values[2] << 2 | die_values[1] << 1 | die_values[0];
+
+	// Ensure die_ordinary is within the valid range (0-9)
+	if (die_ordinary > 9) {
+		printf("die_ordinary is out of range\n");
+		for (i = 0; i < 4; i++) {
+			printf("GPIO%d value: %d\n", die_gpio_pins[i], die_values[i]);
+		}
+		return -1;
+	}
+
+	return die_ordinary;
+}
+
+static int save_firmware_version_to_shm(uint64_t version_table_addr)
+{
+	char *firmware_version = VPU_FW_VERSION;
+
+	debug("Saving firmware version %s to shared memory\n", firmware_version);
+	strncpy((char *)version_table_addr + FIRMWARE_VERSION_OFFSET, firmware_version,
+		FIRMWARE_VERSION_MAX_LEN - 1);
+	// Ensure null termination
+	*((char *)version_table_addr + FIRMWARE_VERSION_OFFSET + FIRMWARE_VERSION_MAX_LEN -
+	  1) = '\0';
+	// Flush cache to make sure data is written to memory
+	flush_dcache_range((ulong)version_table_addr + FIRMWARE_VERSION_OFFSET,
+			   (ulong)version_table_addr + FIRMWARE_VERSION_OFFSET +
+				   FIRMWARE_VERSION_MAX_LEN);
+
+	return 0;
+}
+
+#endif /* CONFIG_BOOT_ESWIN_VPU7702 */
 
 /**
  * passwd_abort_crypt() - check for a crypt-style hashed key sequence to abort booting
@@ -382,6 +499,143 @@ static void print_boot_delay(int bootdelay)
 	printf(ANSI_CLEAR_LINE "\rHit any key to stop autoboot: %d", bootdelay);
 }
 
+#ifdef CONFIG_BOOT_ESWIN_VPU7702
+
+static int es_bar0_update()
+{
+	int ret = 0;
+	u32 testreg_var = 0;
+	u32 reg;
+
+	testreg_var = readl((u32 *)TEST_REG3);
+	printf("update bar0 reg val=0x%x.\n", testreg_var);
+	writel(testreg_var, (u32 *)PCIE_CTRL_CFG14);
+
+ 	reg = readl((u32 *)PCIE_CTRL_CFG14);
+	if (reg != testreg_var) {
+        printf("update bar0 reg, write val = 0x%x, but read val = 0x%x.\n", testreg_var, reg);
+        ret = -2;
+    }
+	return ret;
+
+}
+static int abortboot_single_key(int bootdelay)
+{
+	int abort = 0;
+	unsigned long ts;
+	u32 testreg_var = 0;
+	int ret = 0;
+	const char *board_name;
+
+	if (save_firmware_version_to_shm(VERSION_TABLE_PHYS_ADDR)) {
+		printf("Failed to save firmware version to shared memory\n");
+	}
+
+	board_name = env_get("board_name");
+
+	/*
+	 * set test reg to info host ready for loading image
+	 */
+	if (!strncmp("vpu7702_evb", board_name, 11) ||
+		!strncmp("vpu7702_pcie", board_name, 12)) {
+		writel(READY_SIGN, (u32 *)TEST_REG0);
+		testreg_var = readl((u32 *)TEST_REG0);
+	} else if (!strncmp("ebc7702_p01_", board_name, 11)) {
+		if (save_firmware_version_to_shm(VERSION_TABLE1_PHYS_ADDR)) {
+			printf("Failed to save firmware version to shared memory\n");
+		}
+
+		writel(DIE1_SIGN, (u32 *)TEST_REG2_DIE1);
+		testreg_var = readl((u32 *)TEST_REG2_DIE1);
+		writel(READY_SIGN, (u32 *)TEST_REG2);
+		testreg_var = readl((u32 *)TEST_REG2);
+	} else {
+		writel(READY_SIGN, (u32 *)TEST_REG2);
+		testreg_var = readl((u32 *)TEST_REG2);
+	}
+
+	if (testreg_var != READY_SIGN) {
+		printf("WARNING! set test reg failed. value is %d\n", testreg_var);
+	}
+	bootdelay = 5;
+#ifdef CONFIG_CMD_ESWIN_DIE
+	run_command_list("eswin_die", -1, 0);
+#endif
+	printf("Hit any key to cmd line, or will autoboot once image is loaded.\n");
+
+	/*
+	 * Check if key already pressed
+	 */
+	if (ctrlc()) {	/* we got a ctrl+c press	*/
+		getchar();	/* consume input	*/
+		puts("\b\b\b 0");
+		abort = 1;	/* don't auto boot	*/
+	}
+
+	while ((bootdelay > 0) && (!abort)) {
+		//--bootdelay;
+		/* delay 1000 ms */
+		ts = get_timer(0);
+		do {
+			if (ctrlc()) {	/* we got a ctrl+c press	*/
+				int key;
+
+				abort  = 1;	/* don't auto boot	*/
+				bootdelay = 0;	/* no more delay	*/
+				key = getchar();/* consume input	*/
+				if (IS_ENABLED(CONFIG_AUTOBOOT_USE_MENUKEY))
+					menukey = 0x03; /* ctrl+c key code */
+				break;
+			}
+
+			/*
+			 * autoboot if OS image is loaded from host
+			 * by checking test reg
+			 */
+			if (!strncmp("vpu7702_evb", board_name, 11) ||
+				!strncmp("vpu7702_pcie", board_name, 12)) {
+				testreg_var = readl((u32 *)TEST_REG0);
+			} else {
+				testreg_var = readl((u32 *)TEST_REG2);
+			}
+			if (testreg_var == BAR0_UPDATE) {
+				printf("update bar0....\n");
+				ret = es_bar0_update();
+				if (ret < 0) {
+					abort = 1;
+					break;
+				}
+				if (!strncmp("vpu7702_evb", board_name, 11) ||
+					!strncmp("vpu7702_pcie", board_name, 12)) {
+					writel(BAR0_UPDATE_DONE, (u32 *)TEST_REG0);
+					testreg_var = readl((u32 *)TEST_REG0);
+				} else {
+					writel(BAR0_UPDATE_DONE, (u32 *)TEST_REG2);
+					testreg_var = readl((u32 *)TEST_REG2);
+				}
+
+				if (testreg_var != BAR0_UPDATE_DONE) {
+					printf("WARNING! set test reg failed. value is %d\n", testreg_var);
+				}
+			}
+		//	printf("testreg value is %x.\n", testreg_var);
+			if (testreg_var == BOOT_SIGN) {
+				printf("OS image is loaded. Now autobooting ... \n");
+				invalidate_dcache_range(0x140000000, 0x180000000);
+				run_command_list("bootm 0x140000000", -1, 0);
+			}
+
+			udelay(10000);
+		} while (!abort && get_timer(ts) < 1000);
+
+		//printf("\b\b\b%2d ", bootdelay);
+	}
+
+	putc('\n');
+
+	return abort;
+}
+#else
 static int abortboot_single_key(int bootdelay)
 {
 	int abort = 0;
@@ -423,6 +677,7 @@ static int abortboot_single_key(int bootdelay)
 
 	return abort;
 }
+#endif
 
 static int abortboot(int bootdelay)
 {
@@ -517,6 +772,8 @@ void autoboot_command(const char *s)
 
 		if (lock)
 			disable_ctrlc(prev);	/* restore Ctrl-C checking */
+	} else {
+		env_set("stdout", "vidconsole,serial");
 	}
 
 	if (IS_ENABLED(CONFIG_AUTOBOOT_USE_MENUKEY) &&

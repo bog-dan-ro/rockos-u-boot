@@ -427,6 +427,39 @@ config EFI_UNICODE_CAPITALIZATION
 
 endif
 
+config EFI_LOADER_BOUNCE_BUFFER
+	bool "EFI Applications use bounce buffers for DMA operations"
+	help
+	  Some hardware does not support DMA to full 64bit addresses. For this
+	  hardware we can create a bounce buffer so that payloads don't have to
+	  worry about platform details.
+
+config EFI_PLATFORM_LANG_CODES
+	string "Language codes supported by firmware"
+	default "en-US"
+	help
+	  This value is used to initialize the PlatformLangCodes variable. Its
+	  value is a semicolon (;) separated list of language codes in native
+	  RFC 4646 format, e.g. "en-US;de-DE". The first language code is used
+	  to initialize the PlatformLang variable.
+
+config EFI_HAVE_RUNTIME_RESET
+	# bool "Reset runtime service is available"
+	bool
+	default y
+	depends on ARCH_BCM283X || FSL_LAYERSCAPE || PSCI_RESET || \
+		   SANDBOX || SYSRESET_X86
+
+config EFI_GRUB_ARM32_WORKAROUND
+	bool "Workaround for GRUB on 32bit ARM"
+	default n if ARCH_BCM283X || ARCH_SUNXI || ARCH_QEMU
+	default y
+	depends on ARM && !ARM64
+	help
+	  GRUB prior to version 2.04 requires U-Boot to disable caches. This
+	  workaround currently is also needed on systems with caches that
+	  cannot be managed via CP15.
+
 config EFI_RNG_PROTOCOL
 	bool "EFI_RNG_PROTOCOL support"
 	depends on DM_RNG

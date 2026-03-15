@@ -72,7 +72,7 @@ int overwrite_console(void)
 
 /* Device name */
 #define DEVNAME			"usbkbd"
-
+#define MAX_KEY_BOARD	32
 /* Keyboard maps */
 static const unsigned char usb_kbd_numkey[] = {
 	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
@@ -373,12 +373,24 @@ static int usb_kbd_irq(struct usb_device *dev)
 static inline void usb_kbd_poll_for_event(struct usb_device *dev)
 {
 #if defined(CONFIG_SYS_USB_EVENT_POLL)
+	int ret;
+	static int error_count = 0;
 	struct usb_kbd_pdata *data = dev->privptr;
 
+	/* Suspend detect disconnect if more than 3 times errors.*/
+	if (error_count > 3) {
+		data->last_report = -1;
+		return;
+	}
+
 	/* Submit an interrupt transfer request */
-	if (usb_int_msg(dev, data->intpipe, &data->new[0],
-			data->intpktsize, data->intinterval, true) >= 0)
+	ret = usb_int_msg(dev, data->intpipe, &data->new[0],
+			data->intpktsize, data->intinterval, true);
+	if (ret == -ETIMEDOUT || ret == -EINVAL)
+		error_count++;
+	else if (ret >= 0)
 		usb_kbd_irq_worker(dev);
+
 #elif defined(CONFIG_SYS_USB_EVENT_POLL_VIA_CONTROL_EP) || \
       defined(CONFIG_SYS_USB_EVENT_POLL_VIA_INT_QUEUE)
 #if defined(CONFIG_SYS_USB_EVENT_POLL_VIA_CONTROL_EP)
@@ -596,6 +608,32 @@ static int usb_kbd_probe_dev(struct usb_device *dev, unsigned int ifnum)
 	return 1;
 }
 
+static u32 kbd_usb_bitmap = 0;
+static int kbd_get_id(void)
+{
+	int num = 0;
+	for(num =0; num < MAX_KEY_BOARD; num++)
+	{
+		if(0 == (kbd_usb_bitmap & (0x1 << num)))
+		{
+			kbd_usb_bitmap|= (0x1 << num);
+			return num;
+		}
+	}
+	return -1;
+}
+static int kbd_put_id(int id)
+{
+	if(id >= MAX_KEY_BOARD)
+	{
+		return -1;
+	}
+	else
+	{
+		kbd_usb_bitmap &= (~(0x1 << id));
+		return 0;
+	}
+}
 static int probe_usb_keyboard(struct usb_device *dev)
 {
 	char *stdinname;
@@ -604,6 +642,7 @@ static int probe_usb_keyboard(struct usb_device *dev)
 	unsigned int max_ifnum = min((unsigned int)USB_MAX_ACTIVE_INTERFACES,
 				     (unsigned int)dev->config.no_of_if);
 	int error;
+	int id = 0;
 
 	/* Try probing the keyboard */
 	for (ifnum = 0; ifnum < max_ifnum; ifnum++) {
@@ -627,19 +666,19 @@ static int probe_usb_keyboard(struct usb_device *dev)
 
 	stdinname = env_get("stdin");
 #if CONFIG_IS_ENABLED(CONSOLE_MUX)
-	if (strstr(stdinname, DEVNAME) != NULL) {
+	if (strstr(stdinname, usb_kbd_dev.name) != NULL) {
 		error = iomux_doenv(stdin, stdinname);
 		if (error)
 			return error;
 	}
 #else
 	/* Check if this is the standard input device. */
-	if (!strcmp(stdinname, DEVNAME)) {
+	if (!strcmp(stdinname, usb_kbd_dev.name)) {
 		/* Reassign the console */
 		if (overwrite_console())
 			return 1;
 
-		error = console_assign(stdin, DEVNAME);
+		error = console_assign(stdin, usb_kbd_dev.name);
 		if (error)
 			return error;
 	}
@@ -661,30 +700,48 @@ static int usb_kbd_remove(struct udevice *dev)
 	struct usb_kbd_pdata *data;
 	struct stdio_dev *sdev;
 	int ret;
+	int id = 0;
 
-	sdev = stdio_get_by_name(DEVNAME);
-	if (!sdev) {
-		ret = -ENXIO;
-		goto err;
-	}
-	data = udev->privptr;
-#if CONFIG_IS_ENABLED(CONSOLE_MUX)
-	if (iomux_replace_device(stdin, DEVNAME, "nulldev")) {
-		ret = -ENOLINK;
-		goto err;
-	}
-#endif
-	if (stdio_deregister_dev(sdev, true)) {
-		ret = -EPERM;
-		goto err;
-	}
-#ifdef CONFIG_SYS_USB_EVENT_POLL_VIA_INT_QUEUE
-	destroy_int_queue(udev, data->intq);
-#endif
-	free(data->new);
-	free(data);
+	struct list_head *list = stdio_get_list();
+	struct list_head *pos;
+	list_for_each(pos, list) {
+		sdev = list_entry(pos, struct stdio_dev, list);
+		if(sdev->priv == udev)
+		{
+			sdev = stdio_get_by_name(sdev->name);
+			if (!sdev) {
+				ret = -ENXIO;
+				goto err;
+			}
+			if(strlen(DEVNAME) != strlen(sdev->name))
+			{
+				id = sdev->name[strlen(DEVNAME)] - '0';
+			}
+			kbd_put_id(id);
+			data = udev->privptr;
+		#if CONFIG_IS_ENABLED(CONSOLE_MUX)
+			if (iomux_replace_device(stdin, sdev->name, "nulldev")) {
+				ret = -ENOLINK;
+				goto err;
+			}
+		#endif
+			if (stdio_deregister_dev(sdev, true)) {
+				ret = -EPERM;
+				goto err;
+			}
+		#ifdef CONFIG_SYS_USB_EVENT_POLL_VIA_INT_QUEUE
+			destroy_int_queue(udev, data->intq);
+		#endif
+			free(data->new);
+			free(data);
 
-	return 0;
+			return 0;
+		}
+	}
+	printf("%s: warning, no %s in usb devs", __func__, dev->name);
+	return -ENODEV;
+
+
 err:
 	printf("%s: warning, ret=%d", __func__, ret);
 	return ret;

@@ -49,8 +49,14 @@
 #include <asm/io.h>
 #include <asm/sections.h>
 #include <dm/root.h>
+#include <dm/ofnode.h>
 #include <linux/errno.h>
 #include <linux/log2.h>
+
+#ifdef CONFIG_BOOT_ESWIN_VPU7702
+/* External function declaration for VPU firmware version printing */
+void early_print_vpu_version(void);
+#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -917,6 +923,9 @@ static void initcall_run_f(void)
 	INITCALL(checkcpu);
 #if CONFIG_IS_ENABLED(SYSRESET)
 	INITCALL(print_resetinfo);
+#endif
+#ifdef CONFIG_BOOT_ESWIN_VPU7702
+	INITCALL(early_print_vpu_version); /* display VPU firmware version */
 #endif
 	/* display cpu info (and speed) */
 #if CONFIG_IS_ENABLED(DISPLAY_CPUINFO)

@@ -61,6 +61,54 @@ config TARGET_XILINX_MBV
 config TARGET_ASPEED_AST2700_IBEX
 	bool "Support Ibex RISC-V cores on Aspeed AST2700 SoC"
 
+config TARGET_ESWIN_EVB_EIC7700
+	bool "Support Eswin EIC7700 EVB Board"
+
+config TARGET_ESWIN_EVB_EIC7702
+	bool "Support Eswin EIC7702 EVB Board"
+
+config TARGET_FML13V03
+	bool "Support DeepComputing FML13V03 Board"
+
+config TARGET_HIFIVE_PREMIER_P550
+	bool "Support HiFive Premier P550 Board"
+
+config TARGET_ESWIN_EIC7700_SOM260
+	bool "Support Eswin EIC7700 Z530 Board"
+
+config TARGET_ESWIN_EIC7700_D314
+	bool "Support Eswin EIC7700 D314 Board"
+
+config TARGET_ESWIN_EIC7700_SBC
+	bool "Support Eswin EIC7700 SBC Board"
+
+config TARGET_ESWIN_EIC7700_OSM
+	bool "Support Eswin EIC7700 OSM Board"
+
+config TARGET_ESWIN_VPU7702_EVB
+        bool "Support Eswin VPU7702 EVB Board"
+
+config TARGET_ESWIN_VPU7702_PCIE
+        bool "Support Eswin VPU7702 PCIE Card"
+
+config TARGET_ESWIN_EBC7702_U01_EVB
+        bool "Support ESWIN EBC7702-U01 EVB Card"
+
+config TARGET_ESWIN_EBC7700_M01_EVB
+        bool "Support Eswin EBC7700-M01 EVB Board"
+
+config TARGET_ESWIN_EBC7702_U01_PCIE
+        bool "Support Eswin EBC7702-U01 PCIE Board"
+
+config TARGET_ESWIN_EBC7700_M01_PCIE
+        bool "Support Eswin EBC7700-M01 PCIE Board"
+
+config TARGET_ESWIN_EBC7702_P01_D560
+        bool "Support Eswin EBC7702-P01 D560 Board"
+
+config TARGET_ESWIN_EBC7702_P01_PCIE
+        bool "Support Eswin EBC7702-P01 PCIE Board"
+
 endchoice
 
 config SYS_ICACHE_OFF
@@ -119,6 +167,22 @@ source "board/spacemit/bananapi-f3/Kconfig"
 source "board/starfive/visionfive2/Kconfig"
 source "board/thead/th1520_lpi4a/Kconfig"
 source "board/xilinx/mbv/Kconfig"
+source "board/eswin/eic7700_evb/Kconfig"
+source "board/eswin/eic7702_evb/Kconfig"
+source "board/eswin/hifive_premier_p550/Kconfig"
+source "board/eswin/eic7700_som260/Kconfig"
+source "board/eswin/eic7700_d314/Kconfig"
+source "board/eswin/eic7700_sbc/Kconfig"
+source "board/eswin/eic7700_osm/Kconfig"
+source "board/eswin/FML13V03/Kconfig"
+source "board/eswin/vpu7702_evb/Kconfig"
+source "board/eswin/vpu7702_pcie/Kconfig"
+source "board/eswin/ebc7702_u01_evb/Kconfig"
+source "board/eswin/ebc7700_m01_evb/Kconfig"
+source "board/eswin/ebc7702_u01_pcie/Kconfig"
+source "board/eswin/ebc7700_m01_pcie/Kconfig"
+source "board/eswin/ebc7702_p01_d560/Kconfig"
+source "board/eswin/ebc7702_p01_pcie/Kconfig"
 
 # platform-specific options below
 source "arch/riscv/cpu/andes/Kconfig"
@@ -132,6 +196,7 @@ source "arch/riscv/cpu/jh7110/Kconfig"
 source "arch/riscv/cpu/k1/Kconfig"
 source "arch/riscv/cpu/k230/Kconfig"
 source "arch/riscv/cpu/th1520/Kconfig"
+source "arch/riscv/cpu/eic770x/Kconfig"
 
 # architecture-specific options below
 

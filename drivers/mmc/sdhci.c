@@ -77,11 +77,16 @@ static void sdhci_prepare_dma(struct sdhci_host *host, struct mmc_data *data,
 	dma_addr_t dma_addr;
 	unsigned char ctrl;
 	void *buf;
+	u16 ctrl2;
 
 	if (data->flags == MMC_DATA_READ)
 		buf = data->dest;
 	else
 		buf = (void *)data->src;
+
+	ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+	ctrl2 |= SDHCI_CTRL_64BIT_ADDR;
+	sdhci_writew(host, ctrl2, SDHCI_HOST_CONTROL2);
 
 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
 	ctrl &= ~SDHCI_CTRL_DMA_MASK;
@@ -106,7 +111,14 @@ static void sdhci_prepare_dma(struct sdhci_host *host, struct mmc_data *data,
 
 	if (host->flags & USE_SDMA) {
 		dma_addr = dev_phys_to_bus(mmc_to_dev(host->mmc), host->start_addr);
+#if CONFIG_IS_ENABLED(MMC_SDHCI_SDMA)
+		sdhci_writel(host, lower_32_bits(dma_addr),
+				 SDHCI_ADMA_ADDRESS);
+		sdhci_writel(host, upper_32_bits(dma_addr),
+				 SDHCI_ADMA_ADDRESS_HI);
+#else
 		sdhci_writel(host, dma_addr, SDHCI_DMA_ADDRESS);
+#endif
 	}
 #if CONFIG_IS_ENABLED(MMC_SDHCI_ADMA)
 	else if (host->flags & (USE_ADMA | USE_ADMA64)) {
@@ -165,7 +177,14 @@ static int sdhci_transfer_data(struct sdhci_host *host, struct mmc_data *data)
 				start_addr += SDHCI_DEFAULT_BOUNDARY_SIZE;
 				start_addr = dev_phys_to_bus(mmc_to_dev(host->mmc),
 							     start_addr);
+#if CONFIG_IS_ENABLED(MMC_SDHCI_SDMA)
+				sdhci_writel(host, lower_32_bits(start_addr),
+						 SDHCI_ADMA_ADDRESS);
+				sdhci_writel(host, upper_32_bits(start_addr),
+						 SDHCI_ADMA_ADDRESS_HI);
+#else
 				sdhci_writel(host, start_addr, SDHCI_DMA_ADDRESS);
+#endif
 			}
 		}
 		if (timeout-- > 0)
@@ -293,6 +312,8 @@ static int sdhci_send_command(struct mmc *mmc, struct mmc_cmd *cmd,
 				data->blocksize),
 				SDHCI_BLOCK_SIZE);
 		sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
+		sdhci_writew(host, data->blocks, SDHCI_DMA_ADDRESS);
+
 		sdhci_writew(host, mode, SDHCI_TRANSFER_MODE);
 	} else if (cmd->resp_type & MMC_RSP_BUSY) {
 		sdhci_writeb(host, 0xe, SDHCI_TIMEOUT_CONTROL);
@@ -390,9 +411,12 @@ int sdhci_set_clock(struct mmc *mmc, unsigned int clock)
 
 	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
 
-	if (clock == 0)
+	if (clock == 0) {
+		if (host->ops && host->ops->set_clock) {
+			host->ops->set_clock(host, div);
+		}
 		return 0;
-
+	}
 	if (host->ops && host->ops->set_delay) {
 		ret = host->ops->set_delay(host);
 		if (ret) {
@@ -478,7 +502,7 @@ int sdhci_set_clock(struct mmc *mmc, unsigned int clock)
 		udelay(1000);
 	}
 
-	clk |= SDHCI_CLOCK_CARD_EN;
+	clk |= SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_PLL_EN;
 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
 	return 0;
 }
@@ -705,6 +729,11 @@ static int sdhci_set_ios(struct mmc *mmc)
 	}
 
 	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+
+	if ((mmc->selected_mode != MMC_LEGACY) && 
+		(mmc->selected_mode != MMC_HS) &&
+		(mmc->selected_mode != SD_HS))
+		sdhci_set_power(host, fls(MMC_VDD_165_195 - 1));
 
 	/* If available, call the driver specific "post" set_ios() function */
 	if (host->ops && host->ops->set_ios_post)

@@ -393,6 +393,14 @@ config SPL_PINCTRL_ZYNQMP
 	help
 	  Support pin multiplexing control in SPL on Xilinx ZynqMP. Only "pins"
 	  can be muxed; "groups" are not supported.
+config PINCTRL_EIC770X
+	bool "Eswin EIC770X pin control driver"
+	depends on DM && PINCTRL_GENERIC && EIC770X_RISCV
+	default y
+	help
+	  Support pin multiplexing control on Eswin EIC7700. The driver uses
+	  Generic Pinctrl framework and is compatible with the Linux driver,
+	  i.e. it uses the same device tree configuration.
 
 endif
 

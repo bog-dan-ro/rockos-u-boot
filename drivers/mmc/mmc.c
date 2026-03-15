@@ -588,6 +588,7 @@ static int mmc_switch_voltage(struct mmc *mmc, int signal_voltage)
 {
 	struct mmc_cmd cmd;
 	int err = 0;
+	uint clock = 0;
 
 	/*
 	 * Send CMD11 only if the request is to switch the card to
@@ -617,19 +618,22 @@ static int mmc_switch_voltage(struct mmc *mmc, int signal_voltage)
 	else if (err)
 		return -ETIMEDOUT;
 
+	clock = mmc->clock;
 	/*
 	 * During a signal voltage level switch, the clock must be gated
 	 * for 5 ms according to the SD spec
 	 */
-	mmc_set_clock(mmc, mmc->clock, MMC_CLK_DISABLE);
+	mmc_set_clock(mmc, 0, MMC_CLK_DISABLE);
 
 	err = mmc_set_signal_voltage(mmc, signal_voltage);
-	if (err)
+	if (err) {
+		pr_err("mmc set signal voltage failed.err:%d\n", err);
 		return err;
+	}
 
 	/* Keep clock gated for at least 10 ms, though spec only says 5 ms */
 	mdelay(10);
-	mmc_set_clock(mmc, mmc->clock, MMC_CLK_ENABLE);
+	mmc_set_clock(mmc, clock, MMC_CLK_ENABLE);
 
 	/*
 	 * Failure to switch is indicated by the card holding
@@ -704,7 +708,10 @@ static int sd_send_op_cond(struct mmc *mmc, bool uhs_en)
 		if (timeout-- <= 0)
 			return -EOPNOTSUPP;
 
-		udelay(1000);
+		/*
+		 * Here should waite 10ms(according to kernel) for UHS bit have enough time to become 1
+		 */
+		udelay(10000);
 	}
 
 	if (mmc->version != SD_VERSION_2)
